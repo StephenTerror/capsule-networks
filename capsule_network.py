@@ -5,6 +5,7 @@ https://arxiv.org/abs/1710.09829
 PyTorch implementation by Kenta Iwasaki @ Gram.AI.
 """
 import sys
+
 sys.setrecursionlimit(15000)
 
 import torch
@@ -112,7 +113,8 @@ class CapsuleNet(nn.Module):
             _, max_length_indices = classes.max(dim=1)
             y = Variable(torch.eye(NUM_CLASSES)).cuda().index_select(dim=0, index=max_length_indices.data)
 
-        reconstructions = self.decoder((x * y[:, :, None]).view(x.size(0), -1))
+        # reconstructions = self.decoder((x * y[:, :, None]).view(x.size(0), -1))
+        reconstructions = self.decoder((x * y[:, :, None]).reshape(x.size(0), -1))
 
         return classes, reconstructions
 
@@ -143,6 +145,7 @@ if __name__ == "__main__":
     from torchnet.logger import VisdomPlotLogger, VisdomLogger
     from torchvision.utils import make_grid
     from torchvision.datasets.mnist import MNIST
+    # from torchvision.datasets
     from tqdm import tqdm
     import torchnet as tnt
 
@@ -254,6 +257,7 @@ if __name__ == "__main__":
             make_grid(ground_truth, nrow=int(BATCH_SIZE ** 0.5), normalize=True, range=(0, 1)).numpy())
         reconstruction_logger.log(
             make_grid(reconstruction, nrow=int(BATCH_SIZE ** 0.5), normalize=True, range=(0, 1)).numpy())
+
 
     # def on_start(state):
     #     state['epoch'] = 327

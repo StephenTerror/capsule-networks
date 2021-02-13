@@ -5,6 +5,7 @@ https://arxiv.org/abs/1710.09829
 PyTorch implementation by Kenta Iwasaki @ Gram.AI.
 """
 import sys
+
 sys.setrecursionlimit(15000)
 
 import torch
@@ -34,7 +35,7 @@ def augmentation(x, max_shift=2):
     target_width_slice = slice(max(0, -w_shift), -w_shift + width)
 
     shifted_image = torch.zeros(*x.size())
-    shifted_image[ :, :, source_height_slice, source_width_slice] = x[:, :, target_height_slice, target_width_slice]
+    shifted_image[:, :, source_height_slice, source_width_slice] = x[:, :, target_height_slice, target_width_slice]
     return shifted_image.float()
 
 
@@ -258,6 +259,7 @@ if __name__ == "__main__":
             make_grid(ground_truth, nrow=int(BATCH_SIZE ** 0.5), normalize=True, range=(0, 1)).numpy())
         reconstruction_logger.log(
             make_grid(reconstruction, nrow=int(BATCH_SIZE ** 0.5), normalize=True, range=(0, 1)).numpy())
+
 
     # def on_start(state):
     #     state['epoch'] = 327
