@@ -1,4 +1,2 @@
 .idea/
-data/
-epochs/*
-!epochs/.gitkeep
+/data_folder/
