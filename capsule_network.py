@@ -145,7 +145,6 @@ if __name__ == "__main__":
     from torchnet.logger import VisdomPlotLogger, VisdomLogger
     from torchvision.utils import make_grid
     from torchvision.datasets.mnist import MNIST
-    # from torchvision.datasets
     from tqdm import tqdm
     import torchnet as tnt
 
@@ -176,8 +175,10 @@ if __name__ == "__main__":
 
 
     def get_iterator(mode):
+        # mnist
         dataset = MNIST(root='./data', download=True, train=mode)
         data = getattr(dataset, 'train_data' if mode else 'test_data')
+        print(data.shape)  # (50000, 32, 32, 3)
         labels = getattr(dataset, 'train_labels' if mode else 'test_labels')
         tensor_dataset = tnt.dataset.TensorDataset([data, labels])
 

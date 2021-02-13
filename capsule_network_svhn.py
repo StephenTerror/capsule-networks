@@ -6,6 +6,8 @@ PyTorch implementation by Kenta Iwasaki @ Gram.AI.
 """
 import sys
 
+import torchvision
+
 sys.setrecursionlimit(15000)
 
 import torch
@@ -113,7 +115,8 @@ class CapsuleNet(nn.Module):
             _, max_length_indices = classes.max(dim=1)
             y = Variable(torch.eye(NUM_CLASSES)).cuda().index_select(dim=0, index=max_length_indices.data)
 
-        reconstructions = self.decoder((x * y[:, :, None]).view(x.size(0), -1))
+        # reconstructions = self.decoder((x * y[:, :, None]).view(x.size(0), -1))
+        reconstructions = self.decoder((x * y[:, :, None]).reshape(x.size(0), -1))
 
         return classes, reconstructions
 
@@ -144,6 +147,7 @@ if __name__ == "__main__":
     from torchnet.logger import VisdomPlotLogger, VisdomLogger
     from torchvision.utils import make_grid
     from torchvision.datasets.svhn import SVHN
+    from torchvision.datasets.cifar import CIFAR10
     from tqdm import tqdm
     import torchnet as tnt
 
@@ -174,13 +178,22 @@ if __name__ == "__main__":
 
 
     def get_iterator(mode):
-        if mode is True:
-            dataset = SVHN(root='./data', download=True, split="train")
-        elif mode is False:
-            dataset = SVHN(root='./data', download=True, split="test")
-        data = dataset.data
-        labels = dataset.labels
+        # # SVHN
+        # if mode is True:
+        #     dataset = SVHN(root='./data', download=True, split="train")
+        # else:
+        #     dataset = SVHN(root='./data', download=True, split="test")
+        # data = dataset.data
+        # data = np.array(data, dtype=np.float32)
+        # labels = dataset.labels
+        # tensor_dataset = tnt.dataset.TensorDataset([data, labels])
 
+        # cifar10
+        dataset = CIFAR10(root='./data', download=True, train=mode)
+        data = dataset.data
+        data = np.transpose(data, [0, 3, 1, 2])
+        data = np.array(data, dtype=np.float32)
+        labels = dataset.targets
         tensor_dataset = tnt.dataset.TensorDataset([data, labels])
 
         return tensor_dataset.parallel(batch_size=BATCH_SIZE, num_workers=4, shuffle=mode)
