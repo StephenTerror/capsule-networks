@@ -41,6 +41,12 @@ def augmentation(x, max_shift=2):
     return shifted_image.float()
 
 
+def squash(tensor, dim=-1):
+    squared_norm = (tensor ** 2).sum(dim=dim, keepdim=True)
+    scale = squared_norm / (1 + squared_norm)
+    return scale * tensor / torch.sqrt(squared_norm)
+
+
 class CapsuleLayer(nn.Module):
     def __init__(self, num_capsules, num_route_nodes, in_channels, out_channels, kernel_size=None, stride=None,
                  num_iterations=NUM_ROUTING_ITERATIONS):
@@ -58,11 +64,6 @@ class CapsuleLayer(nn.Module):
                 [nn.Conv2d(in_channels, out_channels, kernel_size=kernel_size, stride=stride, padding=0) for _ in
                  range(num_capsules)])
 
-    def squash(self, tensor, dim=-1):
-        squared_norm = (tensor ** 2).sum(dim=dim, keepdim=True)
-        scale = squared_norm / (1 + squared_norm)
-        return scale * tensor / torch.sqrt(squared_norm)
-
     def forward(self, x):
         if self.num_route_nodes != -1:
             priors = x[None, :, :, None, :] @ self.route_weights[:, None, :, :, :]
@@ -70,7 +71,7 @@ class CapsuleLayer(nn.Module):
             logits = Variable(torch.zeros(*priors.size())).cuda()
             for i in range(self.num_iterations):
                 probs = softmax(logits, dim=2)
-                outputs = self.squash((probs * priors).sum(dim=2, keepdim=True))
+                outputs = squash((probs * priors).sum(dim=2, keepdim=True))
 
                 if i != self.num_iterations - 1:
                     delta_logits = (priors * outputs).sum(dim=-1, keepdim=True)
@@ -78,7 +79,7 @@ class CapsuleLayer(nn.Module):
         else:
             outputs = [capsule(x).view(x.size(0), -1, 1) for capsule in self.capsules]
             outputs = torch.cat(outputs, dim=-1)
-            outputs = self.squash(outputs)
+            outputs = squash(outputs)
 
         return outputs
 

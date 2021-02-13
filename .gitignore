@@ -1,2 +1,7 @@
 .idea/
-/data_folder/
+
+/data_folder/cifar-10-batches-py/
+/data_folder/MNIST/
+/data_folder/cifar-10-python.tar.gz
+/data_folder/test_32x32.mat
+/data_folder/train_32x32.mat
