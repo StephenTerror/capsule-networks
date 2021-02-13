@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch import nn
 from torch.autograd import Variable
 
-from model.original_capsule import CapsuleLayer
+from .capsule_layer import CapsuleLayer
 
 
 class CapsuleNet(nn.Module):
